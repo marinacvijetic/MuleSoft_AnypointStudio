@@ -1,0 +1,13 @@
+[
+  {
+    "totalPrice": 190500.00,
+    "employee_id": 3,
+    "hotel_id": 1,
+    "transport_id": 3,
+    "Reservation_id": 10,
+    "numOfPassengers": 3,
+    "customer_id": 2,
+    "reservationDate": "2022-08-10T00:00:00",
+    "active": true
+  }
+]

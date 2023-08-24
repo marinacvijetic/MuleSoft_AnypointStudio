@@ -1,0 +1,697 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:java="http://www.mulesoft.org/schema/mule/java"
+	xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	
+	<file:config name="File_Config" doc:name="File Config" doc:id="94f82cc2-a672-4da7-b811-2e7d2465d4d6" >
+		<file:connection workingDir="C:\Users\Hp\AnypointStudio\studio-workspace\turistickaagencija\src\main\resources\ChineseERP" />
+	</file:config>
+	<file:config name="File_Config1" doc:name="File Config" doc:id="d87bf459-40d5-438a-855f-ed7ba7fd2361" >
+		<file:connection workingDir="C:\Users\Hp\AnypointStudio\studio-workspace\turistickaagencija\src\main\resources\InternalERP" />
+	</file:config>
+	<flow name="getBookings" doc:id="d61c5603-17f4-458c-be88-3363193fa456" >
+		<db:select doc:name="Select" doc:id="5a6f1a7e-a3d9-4d0c-8fcf-f62b1f5bed06" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from booking]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="1fc7a893-9f5c-47a1-89d4-50f61697e958" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+type Mydate = String { format: "uuuu/MM/dd" }
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	totalPrice: payload01.totalprice,
+	employee_id: payload01.employee_id,
+	hotel_id: payload01.hotel_id,
+	transport_id: payload01.transport_id,
+	Reservation_id: payload01.reservation_id,
+	numOfPassengers: payload01.numofpassengers,
+	customer_id: payload01.customer_id,
+	reservationDate: payload01.reservationdate as Mydate,
+	active: payload01.active
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getCustomers" doc:id="21411ed0-6107-46bc-bbb9-2483fc8019b0" >
+		<set-variable value="#[message.attributes.headers.Active]" doc:name="Set Variable" doc:id="e9e0eba1-66b0-4182-8cbe-118523ac5468" variableName="Customer"/>
+		<choice doc:name="Choice" doc:id="82730e32-ab3b-4c12-a1be-ddedd7dbce3f" >
+			<when expression="#[vars.Customer != null]">
+				<db:select doc:name="Select" doc:id="8b2aa290-207d-4e64-b718-5ebc8aba75de" config-ref="Database_Config">
+			<db:sql><![CDATA[select * from customer
+where Active = :Active]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{
+	Active: attributes.headers['Active']
+}]]]></db:input-parameters>
+		</db:select>
+				<validation:is-not-empty-collection doc:name="Is not empty collection" doc:id="685752b6-00eb-4b60-9fb5-e56504e1f380" />
+				<ee:transform doc:name="Transform Message" doc:id="967bd47e-77c3-4b4f-9cc7-f0777427242b">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	NameC: payload01.namec,
+	AdressC: payload01.adressc default "",
+	Active: payload01.active default true,
+	Customer_ID: payload01.customer_id,
+	SurnameC: payload01.surnamec,
+	CardNumb: payload01.cardnumb default "",
+	CityC: payload01.cityc default "",
+	JMBGC: payload01.jmbgc,
+	Contact: payload01.contact
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</when>
+			<otherwise >
+				<db:select doc:name="Select" doc:id="35abd258-e2d5-4f5f-94dd-f1de9593c1e7" config-ref="Database_Config">
+					<db:sql ><![CDATA[select * from customer]]></db:sql>
+				</db:select>
+				<validation:is-not-empty-collection doc:name="Is not empty collection" doc:id="c1409ce4-87e3-44a4-aee3-299e628d8c6a" />
+				<ee:transform doc:name="Transform Message" doc:id="d8dbb52a-418d-4fdb-8e7d-5b3b6eb7ff40" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	NameC: payload01.namec,
+	AdressC: payload01.adressc default "",
+	Active: payload01.active default true,
+	Customer_ID: payload01.customer_id,
+	SurnameC: payload01.surnamec,
+	CardNumb: payload01.cardnumb default "",
+	CityC: payload01.cityc default "",
+	JMBGC: payload01.jmbgc,
+	Contact: payload01.contact
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="getEmployees" doc:id="031c34e8-e6e2-4e9a-ad14-34facf852896" initialState="started">
+		<choice doc:name="Choice" doc:id="de37e70b-d6c6-493d-b0b6-bdce4d119b8a" >
+			<when expression="#[message.attributes.queryParams['gender']=='F' or message.attributes.queryParams['gender']=='M']">
+				<db:select doc:name="Select" doc:id="6fd26511-b598-41ff-88cf-1a88f0502265" config-ref="Database_Config">
+					<db:sql ><![CDATA[select * from employee
+where gender = :Gender]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{
+	Gender: attributes.queryParams.gender
+}]]]></db:input-parameters>
+				</db:select>
+				<ee:transform doc:name="Transform Message" doc:id="8ca1dadc-02ad-4213-801d-480942695d1b" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	nameE: payload01.namee,
+	phoneNumb: payload01.phonenumb,
+	gender: payload01.gender default "",
+	jmbgE: payload01.jmbge,
+	employee_id: payload01.employee_id,
+	adressE: payload01.adresse default "",
+	orgUnit_id: payload01.orgunit_id,
+	surnameE: payload01.surnamee,
+	cityE: payload01.citye default "",
+	email: payload01.email default ""
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<db:select doc:name="Select" doc:id="ad514189-4002-467c-bfd7-4f841149d3a7" config-ref="Database_Config">
+					<db:sql ><![CDATA[select * from employee]]></db:sql>
+				</db:select>
+				<ee:transform doc:name="Transform Message" doc:id="876cd006-fec4-41ff-879c-f105d92109fa" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	nameE: payload01.namee,
+	phoneNumb: payload01.phonenumb,
+	gender: payload01.gender default "",
+	jmbgE: payload01.jmbge,
+	employee_id: payload01.employee_id,
+	adressE: payload01.adresse default "",
+	orgUnit_id: payload01.orgunit_id,
+	surnameE: payload01.surnamee,
+	cityE: payload01.citye default "",
+	email: payload01.email default ""
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="PutUpdateCustomer" doc:id="eaa74ba2-ae85-44a2-a212-56825e8c6989" >
+		<set-variable value="#[message.payload]" doc:name="Set Variable" doc:id="20f80568-5856-4087-b696-1678c5a3b00e" variableName="Customer"/>
+		<db:select doc:name="Select" doc:id="1c34bd06-dc6d-42c7-816c-0544b3c5fb0c" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from customer
+where customer_id = :Customer_ID]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	Customer_ID: vars.Customer.Customer_ID
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="1444bfbd-b00c-4d37-ab82-3a885b1ddc88" >
+			<when expression="#[payload.customer_id != null]">
+				<db:update doc:name="Update" doc:id="492ddb94-a405-4d12-a0d8-8e2b5842d97f" config-ref="Database_Config">
+					<db:sql ><![CDATA[update customer
+set namec = :NameC, surnamec = :SurnameC, jmbgc = :JMBGC, cityc = :CityC, adressc = :AdressC, contact = :Contact, cardnumb = :CardNumb, active = :Active
+where customer_id = :Customer_ID]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{
+	Customer_ID: vars.Customer.Customer_ID,
+	NameC: vars.Customer.NameC,
+	SurnameC: vars.Customer.SurnameC,
+	JMBGC: vars.Customer.JMBGC,
+	CityC: vars.Customer.CityC,
+	AdressC: vars.Customer.AdressC,
+	Contact: vars.Customer.Contact,
+	CardNumb: vars.Customer.CardNumb,
+	Active: vars.Customer.Active
+	
+}]]]></db:input-parameters>
+				</db:update>
+				<ee:transform doc:name="Transform Message" doc:id="cfc93ce4-965d-44d9-9235-3f43511f4e40" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "Customer with ID=" ++ (vars.Customer.Customer_ID) ++ " is updated."
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<db:insert doc:name="Insert" doc:id="fbd8d335-0594-4f15-b48a-0a9a63af8ff3" config-ref="Database_Config">
+					<db:sql ><![CDATA[insert into customer(customer_id, namec, surnamec, jmbgc, cityc, adressc, contact, cardnumb, active)
+values (nextval('customer_seq'), :NameC, :SurnameC, :JMBGC, :CityC, :AdressC, :Contact, :CardNumb, :Active)]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{
+	Customer_ID: vars.Customer.Customer_ID,
+	NameC: vars.Customer.NameC,
+	SurnameC: vars.Customer.SurnameC,
+	JMBGC: vars.Customer.JMBGC,
+	CityC: vars.Customer.CityC,
+	AdressC: vars.Customer.AdressC,
+	Contact: vars.Customer.Contact,
+	CardNumb: vars.Customer.CardNumb,
+	Active: vars.Customer.Active
+	
+}]]]></db:input-parameters>
+				</db:insert>
+				<ee:transform doc:name="Transform Message" doc:id="c7b8050c-75fa-4c8c-b7bf-d325e833c5e3" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "New customer inserted"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="postBookingInsertFile" doc:id="12deb96d-d184-4b5c-8e77-91645923dece" >
+		<set-variable value="#[message.payload]" doc:name="Set Variable" doc:id="31225a36-b426-468f-a707-9739464ed2fa" variableName="Reservation" />
+		<choice doc:name="Choice" doc:id="c811529a-809d-4235-9c7b-2032e137da8f">
+					<when expression="#[message.payload.totalPrice &gt;= 50000.00 and message.payload.active is true]">
+						<db:insert doc:name="Insert" doc:id="5a8d299d-4ba4-4f33-a7fc-5e4595b622db" config-ref="Database_Config">
+							<db:sql><![CDATA[insert into booking (reservation_id, employee_id, customer_id, numofpassengers, hotel_id, reservationdate, transport_id, totalprice, active)
+values (nextval('booking_seq'), :employee_id, :customer_id, :numOfPassengers, :hotel_id, :reservationDate, :transport_id, :totalPrice, :active)]]></db:sql>
+							<db:input-parameters><![CDATA[#[{
+	Reservation_id: vars.Reservation.Reservation_id,
+	employee_id: vars.Reservation.employee_id,
+	customer_id: vars.Reservation.customer_id,
+	numOfPassengers: vars.Reservation.numOfPassengers,
+	hotel_id: vars.Reservation.hotel_id,
+	reservationDate: vars.Reservation.reservationDate,
+	transport_id: vars.Reservation.transport_id,
+	totalPrice: vars.Reservation.totalPrice,
+	active: vars.Reservation.active
+	
+}]]]></db:input-parameters>
+						</db:insert>
+						<db:select doc:name="Select" doc:id="7654dde8-f734-4c4e-9288-3b192551576b" config-ref="Database_Config">
+							<db:sql><![CDATA[select * from booking 
+order by reservation_id desc
+LIMIT 1]]></db:sql>
+						</db:select>
+						<ee:transform doc:name="Transform Message" doc:id="91e97d14-1a89-494d-bf13-740856ec40d4">
+							<ee:message>
+								<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	totalPrice: payload01.totalprice,
+	employee_id: payload01.employee_id,
+	hotel_id: payload01.hotel_id,
+	transport_id: payload01.transport_id,
+	Reservation_id: payload01.reservation_id,
+	numOfPassengers: payload01.numofpassengers,
+	customer_id: payload01.customer_id,
+	reservationDate: payload01.reservationdate as String default "",
+	active: payload01.active
+}]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<file:write doc:name="Write" doc:id="2d27e935-7381-40c6-90a1-03afe7d16d47" config-ref="File_Config" path="#['OutsourceReservation('++ (now() as String{format:'yyyy-MM-dd-hh-mm-ss'}) ++ ').json']" mode="CREATE_NEW" />
+					</when>
+					<otherwise>
+						<db:insert doc:name="Insert" doc:id="8dfe5dc0-86e5-48f7-9164-75ee690e5830" config-ref="Database_Config">
+							<db:sql><![CDATA[insert into booking (reservation_id, employee_id, customer_id, numofpassengers, hotel_id, reservationdate, transport_id, totalprice, active)
+values (nextval('booking_seq'), :employee_id, :customer_id, :numOfPassengers, :hotel_id, :reservationDate, :transport_id, :totalPrice, :active)]]></db:sql>
+							<db:input-parameters><![CDATA[#[{
+	Reservation_id: vars.Reservation.Reservation_id,
+	employee_id: vars.Reservation.employee_id,
+	customer_id: vars.Reservation.customer_id,
+	numOfPassengers: vars.Reservation.numOfPassengers,
+	hotel_id: vars.Reservation.hotel_id,
+	reservationDate: vars.Reservation.reservationDate,
+	transport_id: vars.Reservation.transport_id,
+	totalPrice: vars.Reservation.totalPrice,
+	active: vars.Reservation.active
+	
+}]]]></db:input-parameters>
+						</db:insert>
+						<db:select doc:name="Select" doc:id="631b0c70-0e6a-4473-af82-596741cedcb2" config-ref="Database_Config">
+							<db:sql><![CDATA[select * from booking 
+order by reservation_id desc
+LIMIT 1]]></db:sql>
+						</db:select>
+						<ee:transform doc:name="Transform Message" doc:id="59d05095-1f6a-4ed2-9f9f-08ec86ec13a6">
+							<ee:message>
+								<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+---
+{
+	root: {
+		row: {
+			totalPrice: payload.totalprice,
+			employee_id: payload.employee_id,
+			hotel_id: payload.hotel_id,
+			transport_id: payload.transport_id,
+			Reservation_id: payload.reservation_id,
+			numOfPassengers: payload.numofpassengers,
+			customer_id: payload.customer_id,
+			reservationDate: payload.reservationdate,
+			active: payload.active
+		}
+	}
+}]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<file:write doc:name="Write" doc:id="c6a3d4e2-3d45-4388-ba0f-3ebf731b6f8d" config-ref="File_Config1" path="#['ReservationFie('++ (now() as String{format:'yyyy-MM-dd-hh-mm-ss'}) ++ ').xml']" mode="CREATE_NEW" />
+					</otherwise>
+				</choice>
+	</flow>
+	<flow name="getDestinations" doc:id="89fc4361-5a54-4c53-bedd-703eaf817032" >
+		<db:select doc:name="Select" doc:id="639a7277-576e-4e8d-a912-6aec8d2880fb" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from destination]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="a096bc26-e521-49a9-8c77-5aac51e4c55e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	city: payload01.cityd,
+	state: payload01.stated,
+	Destination_id: payload01.destination_id
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getUsers" doc:id="3818adb9-bb86-4902-b1e1-3a848134a012" >
+		<db:select doc:name="Select" doc:id="443ee5f4-7920-4bbd-a457-bf959929399f" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from tblUser]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="43f43614-87f0-4c5c-8424-611ddee847ab" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	nameu: payload01.nameu default "",
+	password: payload01.password,
+	user_id: payload01.user_id,
+	isAdmin: payload01.isadmin,
+	surnameu: payload01.surnameu default "",
+	username: payload01.username
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getTransports" doc:id="e88ee4f5-6f41-4c4d-a7e0-75bb7a7b6c9f" >
+		<db:select doc:name="Select" doc:id="7fbff7a8-dd9d-46ad-a626-ee62a2be34f9" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from transport]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="f8248b05-350d-489e-b6ff-049ed322f83b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	transportName: payload01.transportname,
+	transport_id: payload01.transport_id,
+	ticket_id: payload01.ticket_id default 0
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getTickets" doc:id="ce2f2eab-0456-46a0-925d-2ae9e9a1f14d" >
+		<db:select doc:name="Select" doc:id="ffc7db6b-9bcd-483b-8080-a74330b61d5f" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from ticket]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="f35e2ce0-0a5d-4b82-a247-70628b962263" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	ticketprice: payload01.ticketprice,
+	seatnumber: payload01.seatnumber default "",
+	type_id: payload01.type_id,
+	destination: payload01.destination default "",
+	departuredate: payload01.departuredate as String default "",
+	ticket_id: payload01.ticket_id,
+	departuretime: payload01.departuretime as String default ""
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getTickeTypes" doc:id="a4dbb5da-3b55-4326-94d7-d72ff4d16d94" >
+		<db:select doc:name="Select" doc:id="ee11f494-bb93-4fdf-8aa1-f84a19f34e5f" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from tickeType]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="7a6cd07e-5cad-4fa9-b95b-f323cd57c0c9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	type_id: payload01.type_id,
+	typename: payload01.typename
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getHotels" doc:id="8915a04e-13d8-4e91-97b8-711ed5103a3a" >
+		<db:select doc:name="Select" doc:id="8a73a203-5b49-4f75-83ae-75fae9d288a2" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from hotel]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="a01296b6-14da-4e2f-a053-196bd03f1a2d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	roomNumber: payload01.roomnumber default 0,
+	adressH: payload01.adressh,
+	nameH: payload01.nameh,
+	hotel_id: payload01.hotel_id,
+	contact: payload01.contact,
+	destination_id: payload01.destination_id,
+	pricePerNight: payload01.pricepernight
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getOrgUnits" doc:id="2c17abd6-9a0b-4360-97fa-81e2e6271eda" >
+		<db:select doc:name="Select" doc:id="d62f16da-c530-47e0-a3e3-cb19261053a9" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from orgUnit]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="12ff9f0f-3ade-4b0a-8691-e08294dfa768" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	orgunit_id: payload01.orgunit_id,
+	nameofunit: payload01.nameofunit
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getBookingById" doc:id="a45db511-dd14-4e1b-9af9-859d3e41d194" >
+		<db:select doc:name="Select" doc:id="883a24ed-f008-448b-88e9-d1a016a2b6cc" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from booking
+where reservation_id= :ID]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	ID: attributes.uriParams.ID
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="b7d8d082-fd51-4af8-a259-7892d67e8276" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+type Mydate = String { format: "uuuu/MM/dd" }
+---
+payload map (payload01, indexOfpayload01) ->
+{
+	totalPrice: payload01.totalprice,
+	employee_id: payload01.employee_id,
+	hotel_id: payload01.hotel_id,
+	transport_id: payload01.transport_id,
+	Reservation_id: payload01.reservation_id,
+	numOfPassengers: payload01.numofpassengers,
+	customer_id: payload01.customer_id,
+	reservationDate: payload01.reservationdate  as Mydate default "",
+	active: payload01.active
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getTransportById" doc:id="6360bc0f-7bbb-43b3-83c6-5147bdc9ea68" >
+		<db:select doc:name="Select" doc:id="b79354dd-8649-4811-8669-ce4bd208dbc8" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from transport
+where transport_id= :ID]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	ID: attributes.uriParams.ID
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="868186cd-242e-40c3-a7fb-76bcf405acf6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map (payload01, indexOfpayload01) ->
+{
+	transportName: payload01.transportname,
+	transport_id: payload01.transport_id,
+	ticket_id: payload01.ticket_id default 0
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getTickeTypeById" doc:id="7d05cb9f-2cbd-4617-b2b2-7944f3eaba29" >
+		<db:select doc:name="Select" doc:id="574cc5e3-99b0-43dc-bdd0-3a60efbde26b" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from ticketype
+where type_id=:ID]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	ID: attributes.uriParams.ID
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="46da7779-f619-486f-b385-6a7cf84f32e0" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map (payload01, indexOfpayload01) ->
+{
+	type_id: payload01.type_id,
+	typename: payload01.typename
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getOrgUnitById" doc:id="047f2a0a-3831-40b2-aac8-de283c5ca9a2" >
+		<db:select doc:name="Select" doc:id="0b1e6898-a619-4b2b-aac0-77db9dfebd74" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from orgunit 
+where orgunit_id=:ID]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	ID: attributes.uriParams.ID
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="aa52bcb8-3d7f-451c-9931-7cfb624405c0">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map (payload01, indexOfpayload01) ->
+{
+	orgunit_id: payload01.orgunit_id,
+	nameofunit: payload01.nameofunit
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getTicketById" doc:id="55333182-5cf8-4117-9d50-e122a3400f4c" >
+		<db:select doc:name="Select" doc:id="32c4ac9f-d0b4-484a-a436-96ac22551902" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from ticket
+where ticket_id=:ID]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	ID: attributes.uriParams.ID
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="e43bcfd1-c1c2-43aa-8ce9-6283f1a3e06b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+type Mydate = String { format: "uuuu/MM/dd" }
+type Mytime = String {format: "KK:mm:ss a"}
+---
+payload map (payload01, indexOfpayload01) ->
+{
+	ticketprice: payload01.ticketprice,
+	seatnumber: payload01.seatnumber default "",
+	type_id: payload01.type_id,
+	destination: payload01.destination default "",
+	departuredate: payload01.departuredate as Mydate,
+	ticket_id: payload01.ticket_id,
+	departuretime: payload01.departuretime as Mytime
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getHotelById" doc:id="8bb75fdc-3ace-4a3a-8782-73977f4e7c66" >
+		<db:select doc:name="Select" doc:id="e5d4d916-97cf-49de-8cc6-ce05ce989cb6" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from hotel 
+where hotel_id=:ID]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	ID: attributes.uriParams.ID
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="795e0774-a152-43a7-a503-71767651560e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map (payload01, indexOfpayload01) ->
+{
+	roomNumber: payload01.roomnumber default 0,
+	adressH: payload01.adressh,
+	nameH: payload01.nameh,
+	hotel_id: payload01.hotel_id,
+	contact: payload01.contact,
+	destination_id: payload01.destination_id,
+	pricePerNight: payload01.pricepernight
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getDestinationById" doc:id="141d5be2-9d34-43b1-9bdd-dc4fdd3906da" >
+		<db:select doc:name="Select" doc:id="43df9704-c729-423b-9007-dfe825bbcb6e" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from destination
+where destination_id=:ID]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	ID: attributes.uriParams.ID
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="b8fc9c21-fa19-4e13-8e6c-9271bd403d2e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map (payload01, indexOfpayload01) ->
+{
+	city: payload01.cityd,
+	state: payload01.stated,
+	Destination_id: payload01.destination_id
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getCustomerById" doc:id="0abe3690-1428-4719-8ad3-e0561f4ee453" >
+		<db:select doc:name="Select" doc:id="8eb48427-6e53-49bd-b03a-9c80a03de9f4" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from customer
+where customer_id=:ID]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	ID: attributes.uriParams.ID
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="5c84dec4-e06a-4760-8c6e-437534d0e292" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map (payload01, indexOfpayload01) ->
+{
+	NameC: payload01.namec,
+	AdressC: payload01.adressc default "",
+	Active: payload01.active default true,
+	Customer_ID: payload01.customer_id,
+	SurnameC: payload01.surnamec,
+	CardNumb: payload01.cardnumb default "",
+	CityC: payload01.cityc default "",
+	JMBGC: payload01.jmbgc,
+	Contact: payload01.contact
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getUserById" doc:id="553e4d87-b184-40a3-ad44-98679dff3463" >
+		<db:select doc:name="Select" doc:id="44ca475d-1d15-4b55-b6f5-c1ac24f56a4e" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from tbluser
+where user_id=:ID]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	ID: attributes.uriParams.ID
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="2f1198ee-f54b-4c33-b5f8-6bcd31c5ec0f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map (payload01, indexOfpayload01) ->
+{
+	nameu: payload01.nameu default "",
+	password: payload01.password,
+	user_id: payload01.user_id,
+	isAdmin: payload01.isadmin,
+	surnameu: payload01.surnameu default "",
+	username: payload01.username
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getEmployeeById" doc:id="17788f65-f7c2-4f5d-a9a6-b681c4969688" >
+		<db:select doc:name="Select" doc:id="4bd9ce96-5304-4d87-a651-d79b76c858ce" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from employee
+where employee_id = :ID]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	ID: attributes.uriParams.ID
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="aa0c29f6-e918-4202-a984-afac0e886304" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map (payload01, indexOfpayload01) ->
+{
+	nameE: payload01.namee,
+	phoneNumb: payload01.phonenumb,
+	gender: payload01.gender default "",
+	jmbgE: payload01.jmbge,
+	employee_id: payload01.employee_id,
+	adressE: payload01.adresse default "",
+	orgUnit_id: payload01.orgunit_id,
+	surnameE: payload01.surnamee,
+	cityE: payload01.citye default "",
+	email: payload01.email default ""
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

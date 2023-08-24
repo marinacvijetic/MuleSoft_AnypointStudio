@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_21411ed0_6107_46bc_bbb9_2483fc8019b0_Output_Payload = Array<{  NameC: String,   AdressC: String,   Active: Boolean,   Customer_ID: Number,   SurnameC: String,   CardNumb: String,   CityC: String,   JMBGC: String,   Contact: String,   _?: Any}>
+

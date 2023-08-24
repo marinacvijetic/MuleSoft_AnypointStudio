@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<configuration-properties doc:name="Configuration properties" doc:id="dd2b062b-1619-42cb-8f42-ff522d0521f3" file="config.yaml" />
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="d58d5b79-9d73-41e5-b4fa-812765d6a2ed">
+        <http:listener-connection host="0.0.0.0" port="8081" readTimeout="3000" />
+    </http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="6f3fb352-b8a7-4362-904a-88a554180d37" >
+		<db:generic-connection url="${dbase.url}" driverClassName="${dbase.driver}" user="${dbase.user}" password="postgres"/>
+	</db:config>
+</mule>

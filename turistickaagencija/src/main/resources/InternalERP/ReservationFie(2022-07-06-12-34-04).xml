@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<root>
+  <row>
+    <totalPrice>25500</totalPrice>
+    <employee_id>2</employee_id>
+    <hotel_id>1</hotel_id>
+    <transport_id>2</transport_id>
+    <Reservation_id>12</Reservation_id>
+    <numOfPassengers>5</numOfPassengers>
+    <customer_id>4</customer_id>
+    <reservationDate>2022-12-10T00:00:00</reservationDate>
+    <active>true</active>
+  </row>
+</root>

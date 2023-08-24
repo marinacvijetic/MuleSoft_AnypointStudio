@@ -1,0 +1,615 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+    <apikit:config name="turisticka-agencija-api-config" api="resource::e91b09a1-e931-48f8-bd14-0a9ae77aa88e:turisticka-agencija-api:1.0.0:raml:zip:turisticka-agencija-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    
+    <flow name="turisticka-agencija-api-main">
+        <http:listener path="/api/*" config-ref="HTTP_Listener_config">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="turisticka-agencija-api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="turisticka-agencija-api-console">
+        <http:listener path="/console/*" config-ref="HTTP_Listener_config">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="turisticka-agencija-api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="put:\destination\(ID):application\json:turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="ID">attributes.uriParams.'ID'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"Destination updated\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="put:\user\(ID):application\json:turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="ID">attributes.uriParams.'ID'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"User updated\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="put:\booking\(ID):application\json:turisticka-agencija-api-config">
+		<ee:transform doc:name="Transform Message" doc:id="bd6c43bb-8a62-434b-bff4-0b2421f57986" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+    <flow name="put:\customer\(ID):application\json:turisticka-agencija-api-config">
+		<flow-ref doc:name="PutUpdateCustomer" doc:id="f5f81135-05d2-4996-a56f-cfaba63c99d2" name="PutUpdateCustomer"/>
+    </flow>
+    <flow name="put:\hotel\(ID):application\json:turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="ID">attributes.uriParams.'ID'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"Hotel updated\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="put:\transport\(ID):application\json:turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="ID">attributes.uriParams.'ID'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"Transport updated\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="put:\orgunit\(ID):application\json:turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="ID">attributes.uriParams.'ID'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"Organizational unit updated\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="put:\ticket\(ID):application\json:turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="ID">attributes.uriParams.'ID'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"Ticket updated\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="put:\ticketype\(ID):application\json:turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="ID">attributes.uriParams.'ID'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"Ticket type updated\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="put:\employee\(ID):application\json:turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="ID">attributes.uriParams.'ID'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"Employee updated\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="delete:\user\(ID):turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="ID">attributes.uriParams.'ID'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"User deleted.\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="delete:\booking\(ID):turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="ID">attributes.uriParams.'ID'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"Reservation deleted.\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="delete:\employee\(ID):turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="ID">attributes.uriParams.'ID'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"Employee deleted.\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="delete:\customer\(ID):turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="ID">attributes.uriParams.'ID'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"Customer deleted.\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="delete:\transport\(ID):turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="ID">attributes.uriParams.'ID'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"Transport deleted.\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="delete:\ticket\(ID):turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="ID">attributes.uriParams.'ID'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"Ticket deleted.\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="delete:\destination\(ID):turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="ID">attributes.uriParams.'ID'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"Destination deleted.\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="delete:\hotel\(ID):turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="ID">attributes.uriParams.'ID'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"Hotel deleted.\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="delete:\ticketype\(ID):turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="ID">attributes.uriParams.'ID'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"Ticket type deleted.\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="delete:\orgunit\(ID):turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="ID">attributes.uriParams.'ID'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"Organizational unit deleted.\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\booking:turisticka-agencija-api-config" doc:id="316cb1fb-2249-4435-af8b-fd780ac9c8ba">
+        <flow-ref doc:name="getBookings" doc:id="78219323-4abb-48c2-9ca4-2f97c4a27ff0" name="getBookings" />
+    </flow>
+    <flow name="get:\customer:turisticka-agencija-api-config">
+        <flow-ref doc:name="getCustomers" doc:id="8aa420d0-d035-4ad6-b726-40cd8be7f2d5" name="getCustomers" />
+    </flow>
+    <flow name="get:\destination:turisticka-agencija-api-config">
+        <flow-ref doc:name="getDestinations" doc:id="4e704735-94ac-4a3a-a05f-33dd67ea565f" name="getDestinations" />
+    </flow>
+    <flow name="get:\employee:turisticka-agencija-api-config">
+		<flow-ref doc:name="getEmployees" doc:id="21be1d34-2ed7-49a2-8e5e-494264b25527" name="getEmployees"/>
+    </flow>
+    <flow name="get:\hotel:turisticka-agencija-api-config">
+		<flow-ref doc:name="getHotels" doc:id="139b42d9-da4c-4ea2-a4e2-e846ed1a625f" name="getHotels"/>
+    </flow>
+    <flow name="get:\orgunit:turisticka-agencija-api-config">
+		<flow-ref doc:name="getOrgUnits" doc:id="1161c5d0-5a31-4d73-965e-9668beb019ac" name="getOrgUnits"/>
+    </flow>
+    <flow name="get:\ticket:turisticka-agencija-api-config">
+		<flow-ref doc:name="getTickets" doc:id="69e35215-5aab-4bb5-b1dc-7f30967c85c7" name="getTickets"/>
+    </flow>
+    <flow name="get:\ticketype:turisticka-agencija-api-config">
+		<flow-ref doc:name="getTickeTypes" doc:id="bb461da2-8113-4ac3-a73f-9dfc72956c3a" name="getTickeTypes"/>
+    </flow>
+    <flow name="get:\transport:turisticka-agencija-api-config">
+		<flow-ref doc:name="getTransports" doc:id="2e276d9e-b320-489a-b173-ace69486215a" name="getTransports"/>
+    </flow>
+    <flow name="get:\user:turisticka-agencija-api-config">
+		<flow-ref doc:name="getUsers" doc:id="90163c6f-a07b-472a-9e06-818a58baf252" name="getUsers"/>
+    </flow>
+    <flow name="get:\employee\(ID):turisticka-agencija-api-config">
+		<flow-ref doc:name="GetEmployeeById" doc:id="a19fcd3e-64e0-4be8-9686-fff20b6eb485" name="getEmployeeById"/>
+    </flow>
+    <flow name="get:\user\(ID):turisticka-agencija-api-config">
+		<flow-ref doc:name="getUserById" doc:id="7a225962-71d2-48ea-8094-761904bde747" name="getUserById"/>
+    </flow>
+    <flow name="get:\customer\(ID):turisticka-agencija-api-config">
+		<flow-ref doc:name="GetCustomerById" doc:id="be51b2d7-5b14-43ed-967b-b3e51cbfbdad" name="getCustomerById"/>
+    </flow>
+    <flow name="get:\booking\(ID):turisticka-agencija-api-config">
+		<flow-ref doc:name="getBookingById" doc:id="ca0f2a8a-e618-48ca-a593-2f7b12124b97" name="getBookingById"/>
+    </flow>
+    <flow name="get:\transport\(ID):turisticka-agencija-api-config">
+		<flow-ref doc:name="GetTransportById" doc:id="902de4de-1cb0-4c59-b1df-0904a9123e1a" name="getTransportById"/>
+    </flow>
+    <flow name="get:\ticketype\(ID):turisticka-agencija-api-config">
+		<flow-ref doc:name="GetTickeTypeById" doc:id="dd1676c5-181c-4595-aa8b-2fa5f7d550cc" name="getTickeTypeById"/>
+    </flow>
+    <flow name="get:\orgunit\(ID):turisticka-agencija-api-config">
+		<flow-ref doc:name="GetOrgUnitById" doc:id="d868caa4-86a7-404c-881f-a1062d6ddb21" name="getOrgUnitById"/>
+    </flow>
+    <flow name="get:\ticket\(ID):turisticka-agencija-api-config">
+		<flow-ref doc:name="GetTicketById" doc:id="bd8be627-1b5a-41bf-845d-0c509acbb295" name="getTicketById"/>
+    </flow>
+    <flow name="get:\hotel\(ID):turisticka-agencija-api-config">
+		<flow-ref doc:name="GetHotelById" doc:id="f07a76f6-40c4-4063-98cd-23b010290e3f" name="getHotelById"/>
+    </flow>
+    <flow name="get:\destination\(ID):turisticka-agencija-api-config">
+		<flow-ref doc:name="GetDestinationById" doc:id="4fc2e971-e8a1-4844-853a-4ba7660e3135" name="getDestinationById"/>
+    </flow>
+    <flow name="post:\booking:application\json:turisticka-agencija-api-config">
+		<flow-ref doc:name="Post Booking And Insert Into File" doc:id="32db8de7-909c-4b21-a316-332431828172" name="postBookingInsertFile"/>
+    </flow>
+    <flow name="post:\customer:application\json:turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"Customer added.\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\destination:application\json:turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"Destination added.\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\employee:application\json:turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"Employee added.\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\hotel:application\json:turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"Hotel added.\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\orgunit:application\json:turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"Organizational unit added.\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\ticket:application\json:turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"Ticket added.\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\ticketype:application\json:turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"Ticket type added.\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\transport:application\json:turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"Transport added.\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\user:application\json:turisticka-agencija-api-config">
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "string \"User added.\""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+</mule>

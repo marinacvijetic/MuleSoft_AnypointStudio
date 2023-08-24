@@ -1,0 +1,14 @@
+%dw 2.0
+
+type auto_12deb96d_d184_4b5c_8e77_91645923dece_Input_Payload = {
+  totalPrice: Number, 
+  employee_id: Number, 
+  hotel_id: Number, 
+  transport_id: Number, 
+  Reservation_id: Number, 
+  numOfPassengers: Number, 
+  customer_id: Number, 
+  reservationDate: String, 
+  _?: Any
+}
+

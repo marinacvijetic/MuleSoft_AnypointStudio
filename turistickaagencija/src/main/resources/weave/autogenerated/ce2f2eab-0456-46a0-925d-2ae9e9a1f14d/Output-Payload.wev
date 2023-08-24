@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_ce2f2eab_0456_46a0_925d_2ae9e9a1f14d_Output_Payload = Array<{  ticketprice: Number,   seatnumber: String,   type_id: Number,   destination: String,   departuredate: String,   ticket_id: Number,   departuretime: String,   _?: Any}>
+

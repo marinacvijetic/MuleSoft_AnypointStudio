@@ -1,0 +1,15 @@
+%dw 2.0
+
+type auto_eaa74ba2_ae85_44a2_a212_56825e8c6989_Input_Payload = {
+  NameC: String, 
+  AdressC: String, 
+  Active: Boolean, 
+  Customer_ID: Number, 
+  SurnameC: String, 
+  CardNumb: String, 
+  CityC: String, 
+  JMBGC: String, 
+  Contact: String, 
+  _?: Any
+}
+

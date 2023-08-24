@@ -1,0 +1,16 @@
+%dw 2.0
+
+type auto_17788f65_f7c2_4f5d_a9a6_b681c4969688_Output_Payload = {
+  nameE: String, 
+  phoneNumb: String, 
+  gender: String, 
+  jmbgE: String, 
+  employee_id: Number, 
+  adressE: String, 
+  orgUnit_id: Number, 
+  surnameE: String, 
+  cityE: String, 
+  email: String, 
+  _?: Any
+}
+

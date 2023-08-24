@@ -1,0 +1,9 @@
+%dw 2.0
+
+type auto_6360bc0f_7bbb_43b3_83c6_5147bdc9ea68_Output_Payload = {
+  transportName: String, 
+  transport_id: Number, 
+  ticket_id: Number, 
+  _?: Any
+}
+

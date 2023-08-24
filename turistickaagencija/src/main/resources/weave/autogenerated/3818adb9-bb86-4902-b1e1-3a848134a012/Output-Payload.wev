@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_3818adb9_bb86_4902_b1e1_3a848134a012_Output_Payload = Array<{  nameu: String,   password: String,   user_id: Number,   isAdmin: Boolean,   surnameu: String,   username: String,   _?: Any}>
+

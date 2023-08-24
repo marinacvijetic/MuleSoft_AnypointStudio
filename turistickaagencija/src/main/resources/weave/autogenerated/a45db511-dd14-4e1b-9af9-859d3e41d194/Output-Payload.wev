@@ -1,0 +1,14 @@
+%dw 2.0
+
+type auto_a45db511_dd14_4e1b_9af9_859d3e41d194_Output_Payload = {
+  totalPrice: Number, 
+  employee_id: Number, 
+  hotel_id: Number, 
+  transport_id: Number, 
+  Reservation_id: Number, 
+  numOfPassengers: Number, 
+  customer_id: Number, 
+  reservationDate: String, 
+  _?: Any
+}
+

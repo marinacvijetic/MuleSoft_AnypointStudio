@@ -1,0 +1,13 @@
+%dw 2.0
+
+type auto_8bb75fdc_3ace_4a3a_8782_73977f4e7c66_Output_Payload = {
+  roomNumber: Number, 
+  adressH: String, 
+  nameH: String, 
+  hotel_id: Number, 
+  contact: String, 
+  destination_id: Number, 
+  pricePerNight: Number, 
+  _?: Any
+}
+

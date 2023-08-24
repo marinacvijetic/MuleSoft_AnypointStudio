@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_d61c5603_17f4_458c_be88_3363193fa456_Output_Payload = Array<{  totalPrice: Number,   employee_id: Number,   hotel_id: Number,   transport_id: Number,   Reservation_id: Number,   numOfPassengers: Number,   customer_id: Number,   reservationDate: String,   _?: Any}>
+

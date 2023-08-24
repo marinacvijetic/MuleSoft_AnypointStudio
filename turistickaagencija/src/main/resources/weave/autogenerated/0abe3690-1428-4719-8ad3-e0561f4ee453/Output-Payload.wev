@@ -1,0 +1,15 @@
+%dw 2.0
+
+type auto_0abe3690_1428_4719_8ad3_e0561f4ee453_Output_Payload = {
+  NameC: String, 
+  AdressC: String, 
+  Active: Boolean, 
+  Customer_ID: Number, 
+  SurnameC: String, 
+  CardNumb: String, 
+  CityC: String, 
+  JMBGC: String, 
+  Contact: String, 
+  _?: Any
+}
+
